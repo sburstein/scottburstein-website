@@ -8,7 +8,7 @@ export const site = {
   goodreadsUserId: '88883959',
   links: [
     { label: 'GitHub', href: 'https://github.com/sburstein' },
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/scottburstein' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/scott-burstein' },
     { label: 'Email', href: 'mailto:scott.burstein@gmail.com' },
   ],
   nav: [
