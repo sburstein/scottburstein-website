@@ -72,27 +72,61 @@ export async function letterboxdDiary(limit = 8): Promise<Item[]> {
   }
 }
 
-/** One Goodreads shelf. The id comes from site.ts; GOODREADS_USER_ID overrides it. */
+/**
+ * What Scott is reading now, from his public Goodreads profile page.
+ * Goodreads no longer serves shelf RSS (404 as of Nov 2026) and full shelves
+ * need a sign-in, so the profile's "currently reading" box is the only public
+ * source. The "read" shelf stays empty until there is one.
+ * The id comes from site.ts; GOODREADS_USER_ID overrides it.
+ */
 export async function goodreadsShelf(
   shelf: 'currently-reading' | 'read',
   limit = 8,
 ): Promise<Item[]> {
   const id =
     import.meta.env.GOODREADS_USER_ID ?? process.env.GOODREADS_USER_ID ?? site.goodreadsUserId;
-  if (!id) return [];
+  if (!id || shelf !== 'currently-reading') return [];
   try {
-    const items = await rssItems(
-      `https://www.goodreads.com/review/list_rss/${id}?shelf=${shelf}&sort=date_read`,
-    );
-    return items.slice(0, limit).map((i) => ({
-      title: text(i.title),
-      by: text(i.author_name) || undefined,
-      link: text(i.link),
-      meta: shelf === 'read' ? stars(i.user_rating) : 'reading now',
-      date: iso(i.user_read_at || i.user_date_added),
-    }));
+    const url = `https://www.goodreads.com/user/show/${id}`;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(6000),
+      headers: { 'user-agent': 'Mozilla/5.0 (personal site feed)' },
+    });
+    if (!res.ok) throw new Error(`${url} answered ${res.status}`);
+    return currentlyReading(await res.text()).slice(0, limit);
   } catch (err) {
     console.warn('[feeds] goodreads:', (err as Error).message);
     return [];
   }
+}
+
+const decode = (s: string) =>
+  s
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&#x27;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim();
+
+/** Pull title, author and link out of the profile's currently-reading box. */
+export function currentlyReading(html: string): Item[] {
+  const start = html.indexOf('id="currentlyReadingReviews"');
+  if (start < 0) return [];
+  const end = html.indexOf('bigBoxContent', start + 30);
+  const box = html.slice(start, end > 0 ? end : start + 60000);
+  const blocks = box.split('class="Updates').slice(1);
+  const out: Item[] = [];
+  for (const b of blocks) {
+    const t = b.match(/class="bookTitle" href="([^"]+)">([^<]+)</);
+    if (!t) continue;
+    const a = b.match(/class="authorName" href="[^"]*">([^<]+)</);
+    out.push({
+      title: decode(t[2]),
+      by: a ? decode(a[1]) : undefined,
+      link: new URL(t[1], 'https://www.goodreads.com').href,
+      meta: 'reading now',
+    });
+  }
+  return out;
 }
