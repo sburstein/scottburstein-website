@@ -1,0 +1,253 @@
+/* scottburstein.com
+   White page, black type, one typewriter face. Red, yellow and blue appear
+   only as small solid blocks. No shadows, no rounded corners, no gradients. */
+:root {
+  --white: #fff;
+  --black: #000;
+  --grey: #595959;
+  --red: #da291c;
+  --yellow: #ffc72c;
+  --blue: #004b87;
+  --type: 'Courier New', 'Courier Prime', Courier, monospace;
+  --gutter: max(16px, 4vw);
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--type);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--white);
+  color: var(--black);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+a:hover {
+  background: var(--yellow);
+}
+a:focus-visible {
+  outline: 2px solid var(--black);
+  outline-offset: 2px;
+}
+
+.wrap {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px var(--gutter) 32px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+.skip:focus {
+  left: var(--gutter);
+  top: 8px;
+  background: var(--white);
+  padding: 4px 8px;
+}
+
+/* Nav: plain words, the current page underlined. */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  text-transform: uppercase;
+}
+.nav a {
+  text-decoration: none;
+}
+.nav a[aria-current='page'] {
+  text-decoration: underline;
+}
+
+h1 {
+  font-size: clamp(34px, 7.2vw, 80px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin: 56px 0 16px;
+  overflow-wrap: anywhere;
+}
+h1.page {
+  font-size: clamp(30px, 5vw, 52px);
+}
+.line {
+  max-width: 56ch;
+  font-size: 16px;
+}
+
+section {
+  margin-top: 56px;
+  border-top: 1px solid var(--black);
+  padding-top: 20px;
+}
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+h3 {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--grey);
+  text-transform: uppercase;
+  margin: 20px 0 8px;
+}
+
+.sq {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  background: var(--black);
+}
+.sq.red { background: var(--red); }
+.sq.yellow { background: var(--yellow); outline: 1px solid var(--black); outline-offset: -1px; }
+.sq.blue { background: var(--blue); }
+
+.muted {
+  color: var(--grey);
+}
+.more {
+  margin-top: 16px;
+}
+
+/* Item rows: date on the left, title and note on the right. */
+.items {
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+.items li {
+  display: grid;
+  grid-template-columns: 13ch minmax(0, 1fr);
+  gap: 0 16px;
+}
+.items .when {
+  color: var(--grey);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.items .t {
+  font-weight: 700;
+}
+.items .note {
+  display: block;
+  max-width: 62ch;
+}
+.items.plain li {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+.cols section {
+  margin-top: 0;
+}
+.cols-wrap {
+  margin-top: 56px;
+}
+
+/* Books: a flat color block for the cover. */
+.books {
+  display: grid;
+  gap: 24px;
+}
+.book {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 24px;
+  align-items: end;
+}
+.cover {
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--black);
+  padding: 12px;
+  display: flex;
+  align-items: flex-end;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.cover.red { background: var(--red); color: var(--white); }
+.cover.yellow { background: var(--yellow); }
+.cover.blue { background: var(--blue); color: var(--white); }
+
+/* Notes: your own words, set as running text. */
+.notes {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+.notes article {
+  max-width: 62ch;
+}
+.notes .head {
+  font-weight: 700;
+}
+.notes p + p {
+  margin-top: 8px;
+}
+
+.banner {
+  margin-top: 24px;
+  border: 1px solid var(--black);
+  padding: 6px 10px;
+  display: inline-block;
+}
+
+footer {
+  margin-top: 72px;
+  border-top: 1px solid var(--black);
+  padding-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+@media (max-width: 720px) {
+  .cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .items li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .book {
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 16px;
+  }
+  h1 {
+    margin-top: 40px;
+  }
+}

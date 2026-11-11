@@ -1,0 +1,41 @@
+---
+import type { Item } from '../lib/feeds';
+
+interface Props {
+  items: Item[];
+  /** Shown when there is nothing to list. */
+  empty?: string;
+  /** Hide the date column (lists with no dates). */
+  plain?: boolean;
+}
+const { items, empty = 'Nothing logged yet.', plain = false } = Astro.props;
+
+const fmt = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'America/New_York',
+});
+const when = (d?: string) => (d ? fmt.format(new Date(d)) : '');
+---
+
+{
+  items.length === 0 ? (
+    <p class="muted">{empty}</p>
+  ) : (
+    <ul class:list={['items', { plain }]}>
+      {items.map((i) => (
+        <li>
+          {!plain && <span class="when">{when(i.date) || i.meta || ''}</span>}
+          <span>
+            <span class="t">{i.link ? <a href={i.link}>{i.title}</a> : i.title}</span>
+            {i.by && <span>, {i.by}</span>}
+            {i.meta && (plain || i.date) && <span class="muted"> {i.meta}</span>}
+            {i.sample && <span class="muted"> [sample]</span>}
+            {i.note && <span class="note">{i.note}</span>}
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}

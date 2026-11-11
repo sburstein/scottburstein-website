@@ -1,0 +1,54 @@
+---
+import '@fontsource/courier-prime/400.css';
+import '@fontsource/courier-prime/700.css';
+import '../styles/global.css';
+import { site } from '../site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = site.line } = Astro.props;
+const fullTitle = title ? `${title} / ${site.name}` : site.name;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="wrap">
+      <nav class="nav" aria-label="Main">
+        {
+          site.nav.map((n) => (
+            <a href={n.href} aria-current={path === n.href ? 'page' : undefined}>
+              {n.label}
+            </a>
+          ))
+        }
+      </nav>
+      <main id="main">
+        <slot />
+      </main>
+      <footer>
+        <span>{site.name}, New York</span>
+        <nav aria-label="Elsewhere">
+          {site.links.map((l) => <a href={l.href}>{l.label}</a>)}
+        </nav>
+      </footer>
+    </div>
+  </body>
+</html>

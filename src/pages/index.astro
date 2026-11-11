@@ -1,0 +1,48 @@
+---
+import Base from '../layouts/Base.astro';
+import ItemList from '../components/ItemList.astro';
+import { site, FEED_CACHE } from '../site';
+import { substackPosts, letterboxdDiary, goodreadsShelf } from '../lib/feeds';
+import { listening } from '../lib/spotify';
+import { sample, sampleOn } from '../lib/sample';
+
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', FEED_CACHE);
+
+const [posts, reading, heard, films] = await Promise.all([
+  substackPosts(3),
+  goodreadsShelf('currently-reading', 1),
+  listening(),
+  letterboxdDiary(1),
+]);
+const pick = <T,>(real: T[], fake: T[]) => (real.length || !sampleOn ? real : fake).slice(0, 1);
+---
+
+<Base>
+  <h1>{site.name}</h1>
+  <p class="line">{site.line}</p>
+
+  <section>
+    <h2><span class="sq"></span>Writing</h2>
+    <ItemList items={posts} empty="First post soon." />
+    <p class="more"><a href="/writing">All writing</a></p>
+  </section>
+
+  <div class="cols-wrap">
+    <div class="cols">
+      <section>
+        <h2><span class="sq yellow"></span>Reading</h2>
+        <ItemList items={pick(reading, sample.reading)} plain />
+      </section>
+      <section>
+        <h2><span class="sq blue"></span>Listening</h2>
+        <ItemList items={pick(heard.tracks, sample.tracks)} plain />
+      </section>
+      <section>
+        <h2><span class="sq red"></span>Watching</h2>
+        <ItemList items={pick(films, sample.watching)} plain />
+      </section>
+    </div>
+    <p class="more"><a href="/notebook">Open the notebook</a></p>
+  </div>
+</Base>

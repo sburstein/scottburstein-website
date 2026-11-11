@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import ItemList from '../components/ItemList.astro';
+import { site, FEED_CACHE } from '../site';
+import { substackPosts } from '../lib/feeds';
+import { books } from '../data/books';
+
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', FEED_CACHE);
+
+const posts = await substackPosts();
+const shown = books.filter((b) => b.public);
+---
+
+<Base title="Writing" description="Books and essays by Scott Burstein.">
+  <h1 class="page">Writing</h1>
+
+  <section>
+    <h2><span class="sq red"></span>Books</h2>
+    {
+      shown.length === 0 ? (
+        <p class="line">
+          Nonfiction, in progress. <a href={`${site.substack}/subscribe`}>Subscribe on Substack</a>
+          {' '}to hear when the first one is out.
+        </p>
+      ) : (
+        <div class="books">
+          {shown.map((b) => (
+            <div class="book">
+              <div class:list={['cover', b.color]}>{b.title}</div>
+              <div>
+                <p class="muted">{b.status}</p>
+                <p>
+                  <strong>{b.link ? <a href={b.link}>{b.title}</a> : b.title}</strong>
+                </p>
+                <p>{b.blurb}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  <section>
+    <h2><span class="sq"></span>Essays</h2>
+    <ItemList items={posts} empty="First post soon." />
+    <p class="more"><a href={site.substack}>Read and subscribe on Substack</a></p>
+  </section>
+</Base>
