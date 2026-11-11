@@ -1,0 +1,115 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ItemList from '../components/ItemList.astro';
+import { site, FEED_CACHE } from '../site';
+import { letterboxdDiary, goodreadsShelf } from '../lib/feeds';
+import { listening } from '../lib/spotify';
+import { sample, sampleOn } from '../lib/sample';
+
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', FEED_CACHE);
+
+const [now, read, heard, films, allNotes] = await Promise.all([
+  goodreadsShelf('currently-reading', 4),
+  goodreadsShelf('read', 6),
+  listening(),
+  letterboxdDiary(8),
+  getCollection('notes', (n) => !n.data.draft),
+]);
+
+const or = <T,>(real: T[], fake: T[]) => (real.length || !sampleOn ? real : fake);
+const reading = or([...now, ...read], sample.reading);
+const tracks = or(heard.tracks, sample.tracks);
+const shows = or(heard.shows, sample.shows);
+const watching = or(films, sample.watching);
+
+const notes = await Promise.all(
+  allNotes
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+    .map(async (n) => ({ ...n.data, Content: (await render(n)).Content })),
+);
+const of = (kind: string) => notes.filter((n) => n.kind === kind);
+const day = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+---
+
+<Base title="Notebook" description="What Scott Burstein is reading, listening to and watching.">
+  <h1 class="page">Notebook</h1>
+  <p class="line">What I am reading, listening to and watching, with a few notes.</p>
+  {sampleOn && <p class="banner">Sample rows are marked [sample]. They never ship.</p>}
+
+  <section id="reading">
+    <h2><span class="sq yellow"></span>Reading</h2>
+    {
+      of('reading').length > 0 && (
+        <div class="notes">
+          {of('reading').map((n) => (
+            <article>
+              <p class="head">
+                {n.link ? <a href={n.link}>{n.title}</a> : n.title}
+                {n.by && <span>, {n.by}</span>} <span class="muted">{day(n.date)}</span>
+              </p>
+              <n.Content />
+            </article>
+          ))}
+        </div>
+      )
+    }
+    <h3>Shelf</h3>
+    <ItemList items={reading} />
+  </section>
+
+  <section id="listening">
+    <h2><span class="sq blue"></span>Listening</h2>
+    {
+      of('listening').length > 0 && (
+        <div class="notes">
+          {of('listening').map((n) => (
+            <article>
+              <p class="head">
+                {n.link ? <a href={n.link}>{n.title}</a> : n.title}
+                {n.by && <span>, {n.by}</span>} <span class="muted">{day(n.date)}</span>
+              </p>
+              <n.Content />
+            </article>
+          ))}
+        </div>
+      )
+    }
+    <h3>Recently played</h3>
+    <ItemList items={tracks} />
+    {
+      shows.length > 0 && (
+        <>
+          <h3>Podcasts</h3>
+          <ItemList items={shows} plain />
+        </>
+      )
+    }
+  </section>
+
+  <section id="watching">
+    <h2><span class="sq red"></span>Watching</h2>
+    {
+      of('watching').length > 0 && (
+        <div class="notes">
+          {of('watching').map((n) => (
+            <article>
+              <p class="head">
+                {n.link ? <a href={n.link}>{n.title}</a> : n.title}
+                {n.by && <span>, {n.by}</span>} <span class="muted">{day(n.date)}</span>
+              </p>
+              <n.Content />
+            </article>
+          ))}
+        </div>
+      )
+    }
+    <h3>Diary</h3>
+    <ItemList items={watching} />
+    <p class="more">
+      <a href={`https://letterboxd.com/${site.letterboxdUser}/`}>Letterboxd</a>
+    </p>
+  </section>
+</Base>
