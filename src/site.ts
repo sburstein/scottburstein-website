@@ -4,6 +4,8 @@ export const site = {
   line: 'I write nonfiction and build small tools. New York.',
   substack: 'https://scottburstein.substack.com',
   letterboxdUser: 'scottburstein',
+  // The number in goodreads.com/user/show/88883959-scott
+  goodreadsUserId: '88883959',
   links: [
     { label: 'GitHub', href: 'https://github.com/sburstein' },
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/scottburstein' },

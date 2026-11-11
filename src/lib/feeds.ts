@@ -72,12 +72,13 @@ export async function letterboxdDiary(limit = 8): Promise<Item[]> {
   }
 }
 
-/** One Goodreads shelf. Empty until GOODREADS_USER_ID is set. */
+/** One Goodreads shelf. The id comes from site.ts; GOODREADS_USER_ID overrides it. */
 export async function goodreadsShelf(
   shelf: 'currently-reading' | 'read',
   limit = 8,
 ): Promise<Item[]> {
-  const id = import.meta.env.GOODREADS_USER_ID ?? process.env.GOODREADS_USER_ID;
+  const id =
+    import.meta.env.GOODREADS_USER_ID ?? process.env.GOODREADS_USER_ID ?? site.goodreadsUserId;
   if (!id) return [];
   try {
     const items = await rssItems(

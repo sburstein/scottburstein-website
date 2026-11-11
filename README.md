@@ -39,7 +39,7 @@ Essays fall back to `src/data/snapshot.json` if Substack is unreachable.
 
 | Name | For | How to get it |
 | --- | --- | --- |
-| `GOODREADS_USER_ID` | Reading | The number in your Goodreads profile URL |
+| `GOODREADS_USER_ID` | Reading | Optional override. The default is set in `src/site.ts` |
 | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` | Listening | Create an app at developer.spotify.com/dashboard with redirect URI `http://127.0.0.1:8888/callback`. Needs Spotify Premium. |
 | `SPOTIFY_REFRESH_TOKEN` | Listening | `SPOTIFY_CLIENT_ID=... SPOTIFY_CLIENT_SECRET=... npm run spotify:auth` |
 
